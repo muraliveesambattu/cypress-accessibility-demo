@@ -13,10 +13,26 @@
             background-color: #f0f0f0;
         }
         
-        /* Poor contrast - accessibility issue */
+        /* Skip link for accessibility */
+        .skip-link {
+            position: absolute;
+            top: -40px;
+            left: 0;
+            background: #000;
+            color: #fff;
+            padding: 8px;
+            text-decoration: none;
+            z-index: 100;
+        }
+        
+        .skip-link:focus {
+            top: 0;
+        }
+        
+        /* Fixed contrast - accessibility fix */
         .header {
-            background-color: #f5f5f5;
-            color: #f8f8f8;
+            background-color: #333;
+            color: #fff;
             padding: 10px;
             margin-bottom: 20px;
         }
@@ -36,13 +52,28 @@
             margin-bottom: 15px;
         }
         
-        /* Missing labels - accessibility issue */
+        /* Proper labels - accessibility fix */
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        
         input, textarea, select {
             width: 100%;
             padding: 8px;
             border: 1px solid #ddd;
             border-radius: 4px;
             font-size: 14px;
+            box-sizing: border-box;
+        }
+        
+        /* Proper focus indicators - accessibility fix */
+        input:focus, textarea:focus, select:focus {
+            outline: 2px solid #007bff;
+            outline-offset: 2px;
+            border-color: #007bff;
         }
         
         button {
@@ -53,10 +84,20 @@
             border-radius: 4px;
             cursor: pointer;
             margin-right: 10px;
+            font-size: 14px;
         }
         
         button:hover {
             background-color: #0056b3;
+        }
+        
+        button:focus {
+            outline: 2px solid #0056b3;
+            outline-offset: 2px;
+        }
+        
+        button:active {
+            background-color: #004085;
         }
         
         .item-list {
@@ -79,68 +120,95 @@
             margin-top: 10px;
         }
         
-        /* Image without alt text - accessibility issue */
+        /* Image with proper styling */
         .logo {
             width: 50px;
             height: 50px;
+            vertical-align: middle;
+            margin-right: 10px;
         }
         
-        /* Missing focus indicators - accessibility issue */
-        input:focus, textarea:focus, select:focus {
-            outline: none;
-        }
-        
-        /* Status badge with poor contrast */
+        /* Status badge with proper contrast - accessibility fix */
         .status {
             display: inline-block;
             padding: 3px 8px;
             border-radius: 3px;
             font-size: 12px;
-            background-color: #e0e0e0;
-            color: #e0e0e0;
+            font-weight: bold;
+        }
+        
+        .status.active {
+            background-color: #28a745;
+            color: #fff;
+        }
+        
+        .status.inactive {
+            background-color: #6c757d;
+            color: #fff;
+        }
+        
+        .visually-hidden {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
         }
     </style>
 </head>
 <body>
-    <!-- Missing skip link - accessibility issue -->
-    <div class="header">
-        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='50' height='50'%3E%3Crect fill='%23007bff' width='50' height='50'/%3E%3C/svg%3E" class="logo">
+    <!-- Skip link for accessibility -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    
+    <header class="header" role="banner">
+        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='50' height='50'%3E%3Crect fill='%23007bff' width='50' height='50'/%3E%3C/svg%3E" class="logo" alt="Application Logo">
         <h1>CRUD Application</h1>
-    </div>
+    </header>
     
-    <div class="container">
-        <h2>Add New Item</h2>
-        <form id="itemForm">
-            <!-- Missing labels - accessibility issue -->
-            <div class="form-group">
-                <input type="text" id="itemName" placeholder="Item Name" required>
-            </div>
+    <main id="main-content" role="main">
+        <div class="container">
+            <section aria-labelledby="form-heading">
+                <h2 id="form-heading">Add New Item</h2>
+                <form id="itemForm" aria-label="Item form">
+                    <!-- Proper labels - accessibility fix -->
+                    <div class="form-group">
+                        <label for="itemName">Item Name <span aria-label="required">*</span></label>
+                        <input type="text" id="itemName" name="itemName" placeholder="Item Name" required aria-required="true">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="itemDescription">Description <span aria-label="required">*</span></label>
+                        <textarea id="itemDescription" name="itemDescription" placeholder="Description" rows="4" required aria-required="true"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="itemStatus">Status</label>
+                        <select id="itemStatus" name="itemStatus" aria-label="Item status">
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Buttons with proper labels - accessibility fix -->
+                    <div role="group" aria-label="Form actions">
+                        <button type="submit" aria-label="Add new item">Add</button>
+                        <button type="button" id="clearBtn" aria-label="Clear form">Clear</button>
+                    </div>
+                </form>
+            </section>
             
-            <div class="form-group">
-                <textarea id="itemDescription" placeholder="Description" rows="4" required></textarea>
-            </div>
-            
-            <div class="form-group">
-                <select id="itemStatus">
-                    <option value="active">Active</option>
-                    <option value="inactive">Inactive</option>
-                </select>
-            </div>
-            
-            <!-- Button without proper label - accessibility issue -->
-            <button type="submit">Add</button>
-            <button type="button" id="clearBtn">Clear</button>
-        </form>
-        
-        <div class="item-list">
-            <h2>Items List</h2>
-            <div id="itemsContainer">
-                <!-- Items will be loaded here -->
-            </div>
+            <section class="item-list" aria-labelledby="list-heading">
+                <h2 id="list-heading">Items List</h2>
+                <div id="itemsContainer" role="list" aria-label="List of items">
+                    <!-- Items will be loaded here -->
+                </div>
+            </section>
         </div>
-    </div>
-    
-    <!-- Missing ARIA landmarks - accessibility issue -->
+    </main>
     
     <script>
         let editingId = null;
@@ -165,12 +233,19 @@
             
             document.getElementById('itemForm').reset();
             editingId = null;
+            // Update button text and aria-label
+            const submitButton = document.querySelector('button[type="submit"]');
+            submitButton.textContent = 'Add';
+            submitButton.setAttribute('aria-label', 'Add new item');
             loadItems();
         });
         
         document.getElementById('clearBtn').addEventListener('click', () => {
             document.getElementById('itemForm').reset();
             editingId = null;
+            const submitButton = document.querySelector('button[type="submit"]');
+            submitButton.textContent = 'Add';
+            submitButton.setAttribute('aria-label', 'Add new item');
         });
         
         async function loadItems() {
@@ -187,20 +262,36 @@
             const container = document.getElementById('itemsContainer');
             container.innerHTML = '';
             
+            if (items.length === 0) {
+                container.innerHTML = '<p>No items found. Add your first item above.</p>';
+                return;
+            }
+            
             items.forEach(item => {
-                const card = document.createElement('div');
+                const card = document.createElement('article');
                 card.className = 'item-card';
+                card.setAttribute('role', 'listitem');
+                card.setAttribute('aria-labelledby', `item-name-${item.id}`);
+                
+                const statusClass = item.status === 'active' ? 'active' : 'inactive';
+                
                 card.innerHTML = `
-                    <h3>${item.name}</h3>
-                    <p>${item.description}</p>
-                    <span class="status">${item.status}</span>
-                    <div class="actions">
-                        <button onclick="editItem(${item.id})">Edit</button>
-                        <button onclick="deleteItem(${item.id})">Delete</button>
+                    <h3 id="item-name-${item.id}">${escapeHtml(item.name)}</h3>
+                    <p>${escapeHtml(item.description)}</p>
+                    <span class="status ${statusClass}" aria-label="Status: ${item.status}">${item.status}</span>
+                    <div class="actions" role="group" aria-label="Item actions">
+                        <button onclick="editItem(${item.id})" aria-label="Edit ${escapeHtml(item.name)}">Edit</button>
+                        <button onclick="deleteItem(${item.id})" aria-label="Delete ${escapeHtml(item.name)}">Delete</button>
                     </div>
                 `;
                 container.appendChild(card);
             });
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         }
         
         async function createItem(item) {
@@ -215,6 +306,7 @@
                 return await response.json();
             } catch (error) {
                 console.error('Error creating item:', error);
+                alert('Error creating item. Please try again.');
             }
         }
         
@@ -230,6 +322,7 @@
                 return await response.json();
             } catch (error) {
                 console.error('Error updating item:', error);
+                alert('Error updating item. Please try again.');
             }
         }
         
@@ -244,6 +337,7 @@
                 loadItems();
             } catch (error) {
                 console.error('Error deleting item:', error);
+                alert('Error deleting item. Please try again.');
             }
         }
         
@@ -255,9 +349,17 @@
                 document.getElementById('itemDescription').value = item.description;
                 document.getElementById('itemStatus').value = item.status;
                 editingId = id;
-                // Missing focus management - accessibility issue
+                
+                // Focus management - accessibility fix
+                document.getElementById('itemName').focus();
+                
+                // Update button text and aria-label
+                const submitButton = document.querySelector('button[type="submit"]');
+                submitButton.textContent = 'Update';
+                submitButton.setAttribute('aria-label', `Update ${item.name}`);
             } catch (error) {
                 console.error('Error loading item:', error);
+                alert('Error loading item. Please try again.');
             }
         }
         
@@ -267,4 +369,3 @@
     </script>
 </body>
 </html>
-
