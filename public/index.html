@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRUD Application</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        
+        /* Poor contrast - accessibility issue */
+        .header {
+            background-color: #f5f5f5;
+            color: #f8f8f8;
+            padding: 10px;
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            margin: 0;
+        }
+        
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        /* Missing labels - accessibility issue */
+        input, textarea, select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        
+        button:hover {
+            background-color: #0056b3;
+        }
+        
+        .item-list {
+            margin-top: 30px;
+        }
+        
+        .item-card {
+            background: #fff;
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+        
+        .item-card h3 {
+            margin-top: 0;
+        }
+        
+        .actions {
+            margin-top: 10px;
+        }
+        
+        /* Image without alt text - accessibility issue */
+        .logo {
+            width: 50px;
+            height: 50px;
+        }
+        
+        /* Missing focus indicators - accessibility issue */
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+        }
+        
+        /* Status badge with poor contrast */
+        .status {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+            background-color: #e0e0e0;
+            color: #e0e0e0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Missing skip link - accessibility issue -->
+    <div class="header">
+        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='50' height='50'%3E%3Crect fill='%23007bff' width='50' height='50'/%3E%3C/svg%3E" class="logo">
+        <h1>CRUD Application</h1>
+    </div>
+    
+    <div class="container">
+        <h2>Add New Item</h2>
+        <form id="itemForm">
+            <!-- Missing labels - accessibility issue -->
+            <div class="form-group">
+                <input type="text" id="itemName" placeholder="Item Name" required>
+            </div>
+            
+            <div class="form-group">
+                <textarea id="itemDescription" placeholder="Description" rows="4" required></textarea>
+            </div>
+            
+            <div class="form-group">
+                <select id="itemStatus">
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                </select>
+            </div>
+            
+            <!-- Button without proper label - accessibility issue -->
+            <button type="submit">Add</button>
+            <button type="button" id="clearBtn">Clear</button>
+        </form>
+        
+        <div class="item-list">
+            <h2>Items List</h2>
+            <div id="itemsContainer">
+                <!-- Items will be loaded here -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- Missing ARIA landmarks - accessibility issue -->
+    
+    <script>
+        let editingId = null;
+        
+        // Load items on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadItems();
+        });
+        
+        // Form submission
+        document.getElementById('itemForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('itemName').value;
+            const description = document.getElementById('itemDescription').value;
+            const status = document.getElementById('itemStatus').value;
+            
+            if (editingId) {
+                await updateItem(editingId, { name, description, status });
+            } else {
+                await createItem({ name, description, status });
+            }
+            
+            document.getElementById('itemForm').reset();
+            editingId = null;
+            loadItems();
+        });
+        
+        document.getElementById('clearBtn').addEventListener('click', () => {
+            document.getElementById('itemForm').reset();
+            editingId = null;
+        });
+        
+        async function loadItems() {
+            try {
+                const response = await fetch('/api/items');
+                const items = await response.json();
+                displayItems(items);
+            } catch (error) {
+                console.error('Error loading items:', error);
+            }
+        }
+        
+        function displayItems(items) {
+            const container = document.getElementById('itemsContainer');
+            container.innerHTML = '';
+            
+            items.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'item-card';
+                card.innerHTML = `
+                    <h3>${item.name}</h3>
+                    <p>${item.description}</p>
+                    <span class="status">${item.status}</span>
+                    <div class="actions">
+                        <button onclick="editItem(${item.id})">Edit</button>
+                        <button onclick="deleteItem(${item.id})">Delete</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+        
+        async function createItem(item) {
+            try {
+                const response = await fetch('/api/items', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(item)
+                });
+                return await response.json();
+            } catch (error) {
+                console.error('Error creating item:', error);
+            }
+        }
+        
+        async function updateItem(id, item) {
+            try {
+                const response = await fetch(`/api/items/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(item)
+                });
+                return await response.json();
+            } catch (error) {
+                console.error('Error updating item:', error);
+            }
+        }
+        
+        async function deleteItem(id) {
+            if (!confirm('Are you sure you want to delete this item?')) {
+                return;
+            }
+            try {
+                await fetch(`/api/items/${id}`, {
+                    method: 'DELETE'
+                });
+                loadItems();
+            } catch (error) {
+                console.error('Error deleting item:', error);
+            }
+        }
+        
+        async function editItem(id) {
+            try {
+                const response = await fetch(`/api/items/${id}`);
+                const item = await response.json();
+                document.getElementById('itemName').value = item.name;
+                document.getElementById('itemDescription').value = item.description;
+                document.getElementById('itemStatus').value = item.status;
+                editingId = id;
+                // Missing focus management - accessibility issue
+            } catch (error) {
+                console.error('Error loading item:', error);
+            }
+        }
+        
+        // Make functions global for onclick handlers
+        window.editItem = editItem;
+        window.deleteItem = deleteItem;
+    </script>
+</body>
+</html>
+

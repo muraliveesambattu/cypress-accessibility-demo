@@ -4,7 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node server.js",
+    "test": "cypress run",
+    "test:open": "cypress open",
+    "test:a11y": "cypress run --spec 'cypress/e2e/a11y-todo.cy.js'"
   },
   "keywords": [],
   "author": "",
@@ -13,6 +16,8 @@
     "express": "^5.1.0"
   },
   "devDependencies": {
-    "cypress": "^15.7.0"
+    "axe-core": "^4.11.0",
+    "cypress": "^15.7.0",
+    "cypress-axe": "^1.7.0"
   }
 }
